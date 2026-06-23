@@ -101,6 +101,40 @@ const app = {
 
         Store.addProperty({ name, address, units, value, status: 'Active' });
         app.closeModal();
+    },
+
+    submitTenant: () => {
+        const name = document.getElementById('tenantName').value;
+        const email = document.getElementById('tenantEmail').value;
+        const phone = document.getElementById('tenantPhone').value;
+        const propertyId = document.getElementById('tenantProp').value;
+        const unit = document.getElementById('tenantUnit').value;
+
+        Store.addTenant({ name, email, phone, propertyId, unit, status: 'Current' });
+        app.closeModal();
+    },
+
+    submitTransaction: () => {
+        const date = document.getElementById('txDate').value;
+        const amount = parseFloat(document.getElementById('txAmount').value);
+        const description = document.getElementById('txDesc').value;
+        const category = document.getElementById('txCat').value;
+
+        Store.addTransaction({ date, amount, description, category, propertyId: 'p1' });
+        app.closeModal();
+    },
+
+    handleCSVUpload: (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // In a real app, we'd use PapaParse here. 
+        // For now, let's just show an alert and simulate success.
+        alert(`Successfully parsed ${file.name}! Check the console for data.`);
+        console.log(`Simulating import of ${file.name}`);
+        
+        // After import completes, redirect to dashboard
+        window.location.hash = 'dashboard';
     }
 };
 

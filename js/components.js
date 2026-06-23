@@ -369,6 +369,84 @@ export const Components = {
                     <button class="btn btn-primary" onclick="document.getElementById('propertyForm').requestSubmit()">Save Property</button>
                 </div>
             `;
+        } else if (type === 'addTenant') {
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Add New Tenant</h2>
+                    <button class="modal-close" onclick="app.closeModal()"><i class='bx bx-x'></i></button>
+                </div>
+                <div class="modal-body">
+                    <form id="tenantForm" onsubmit="event.preventDefault(); app.submitTenant();">
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="tenantName" required>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <div class="form-group" style="flex: 1">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="tenantEmail" required>
+                            </div>
+                            <div class="form-group" style="flex: 1">
+                                <label class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="tenantPhone" required>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <div class="form-group" style="flex: 2">
+                                <label class="form-label">Property ID</label>
+                                <input type="text" class="form-control" id="tenantProp" required placeholder="e.g. p1">
+                            </div>
+                            <div class="form-group" style="flex: 1">
+                                <label class="form-label">Unit</label>
+                                <input type="text" class="form-control" id="tenantUnit" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="document.getElementById('tenantForm').requestSubmit()">Save Tenant</button>
+                </div>
+            `;
+        } else if (type === 'addTransaction') {
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Log Transaction</h2>
+                    <button class="modal-close" onclick="app.closeModal()"><i class='bx bx-x'></i></button>
+                </div>
+                <div class="modal-body">
+                    <form id="txForm" onsubmit="event.preventDefault(); app.submitTransaction();">
+                        <div style="display: flex; gap: 1rem;">
+                            <div class="form-group" style="flex: 1">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" id="txDate" required>
+                            </div>
+                            <div class="form-group" style="flex: 1">
+                                <label class="form-label">Amount ($)</label>
+                                <input type="number" class="form-control" id="txAmount" required step="0.01">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" id="txDesc" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select class="form-control" id="txCat" required>
+                                <option value="Income: Rent">Income: Rent</option>
+                                <option value="Expense: Repairs">Expense: Repairs</option>
+                                <option value="Expense: Taxes">Expense: Taxes</option>
+                                <option value="Expense: Insurance">Expense: Insurance</option>
+                                <option value="Expense: Utilities">Expense: Utilities</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="document.getElementById('txForm').requestSubmit()">Log Transaction</button>
+                </div>
+            `;
         }
         return '';
     },
@@ -487,7 +565,7 @@ export const Components = {
                     <h3>Upload TurboTenant CSV</h3>
                     <p style="margin-bottom: 2rem;">Drag and drop your exported Properties, Tenants, or Transactions CSV file here.</p>
                     
-                    <input type="file" id="csvUpload" accept=".csv" style="display: none;">
+                    <input type="file" id="csvUpload" accept=".csv" style="display: none;" onchange="app.handleCSVUpload(event)">
                     <button class="btn btn-primary" onclick="document.getElementById('csvUpload').click()">
                         Select CSV File
                     </button>

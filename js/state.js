@@ -66,19 +66,53 @@ export const Store = {
     },
 
     addProperty: async (property) => {
-        if (hasDb) {
+        const id = 'p' + Date.now();
+        const newProp = { id, ...property };
+        
+        if (hasDb && db) {
             try {
-                await addDoc(collection(db, "properties"), property);
-                console.log("Property saved to Firestore!");
+                const { doc, setDoc } = window.firebaseFirestore;
+                await setDoc(doc(db, 'properties', id), newProp);
             } catch (e) {
-                console.error("Error adding document: ", e);
+                console.error("Error adding to Firestore", e);
             }
         } else {
-            localState.properties.push({
-                id: 'p' + Date.now(),
-                ...property
-            });
-            document.dispatchEvent(new Event('stateChanged'));
+            localState.properties.push(newProp);
+            document.dispatchEvent(new CustomEvent('stateChanged'));
+        }
+    },
+    
+    addTenant: async (tenant) => {
+        const id = 't' + Date.now();
+        const newTenant = { id, ...tenant };
+        
+        if (hasDb && db) {
+            try {
+                const { doc, setDoc } = window.firebaseFirestore;
+                await setDoc(doc(db, 'tenants', id), newTenant);
+            } catch (e) {
+                console.error("Error adding to Firestore", e);
+            }
+        } else {
+            localState.tenants.push(newTenant);
+            document.dispatchEvent(new CustomEvent('stateChanged'));
+        }
+    },
+    
+    addTransaction: async (tx) => {
+        const id = 'tx' + Date.now();
+        const newTx = { id, ...tx };
+        
+        if (hasDb && db) {
+            try {
+                const { doc, setDoc } = window.firebaseFirestore;
+                await setDoc(doc(db, 'transactions', id), newTx);
+            } catch (e) {
+                console.error("Error adding to Firestore", e);
+            }
+        } else {
+            localState.transactions.push(newTx);
+            document.dispatchEvent(new CustomEvent('stateChanged'));
         }
     },
 
