@@ -1,20 +1,71 @@
 import { Store } from './state.js';
-import { Components } from './components.js';
+import { Components, renderLoginScreen, renderUserProfile } from './components.js';
+import { auth, provider, signInWithPopup, onAuthStateChanged, signOut } from './firebase-config.js';
 
 const app = {
     currentView: 'dashboard',
+    currentUser: null,
     
     init: () => {
         app.bindEvents();
-        app.handleRoute();
         
-        // Start Firebase real-time listeners (if configured)
-        Store.initRealtimeListeners();
+        // Listen to Auth State
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    app.currentUser = user;
+                    document.body.classList.remove('logged-out');
+                    // Setup User Profile in Sidebar
+                    const sidebar = document.querySelector('.sidebar');
+                    let profileSection = document.querySelector('.user-profile-section');
+                    if (!profileSection) {
+                        sidebar.insertAdjacentHTML('beforeend', renderUserProfile(user));
+                        document.getElementById('logout-btn').addEventListener('click', app.handleLogout);
+                    }
+                    
+                    app.handleRoute();
+                    Store.initRealtimeListeners();
+                } else {
+                    app.currentUser = null;
+                    document.body.classList.add('logged-out');
+                    document.getElementById('view-container').innerHTML = renderLoginScreen();
+                    document.getElementById('google-signin-btn')?.addEventListener('click', app.handleLogin);
+                    
+                    const profileSection = document.querySelector('.user-profile-section');
+                    if (profileSection) profileSection.remove();
+                }
+            });
+        } else {
+            // Fallback if no firebase config
+            app.handleRoute();
+            Store.initRealtimeListeners();
+        }
         
         // Listen for hash changes to navigate
-        window.addEventListener('hashchange', app.handleRoute);
+        window.addEventListener('hashchange', () => {
+            if (app.currentUser || !auth) app.handleRoute();
+        });
         // Listen for state changes to re-render the current view
-        document.addEventListener('stateChanged', () => app.renderView(app.currentView));
+        document.addEventListener('stateChanged', () => {
+            if (app.currentUser || !auth) app.renderView(app.currentView);
+        });
+    },
+
+    handleLogin: async () => {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (error) {
+            console.error("Login failed", error);
+            alert("Login failed: " + error.message);
+        }
+    },
+
+    handleLogout: async () => {
+        try {
+            await signOut(auth);
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
     },
 
     bindEvents: () => {
@@ -128,12 +179,9 @@ const app = {
         const file = event.target.files[0];
         if (!file) return;
 
-        // In a real app, we'd use PapaParse here. 
-        // For now, let's just show an alert and simulate success.
         alert(`Successfully parsed ${file.name}! Check the console for data.`);
         console.log(`Simulating import of ${file.name}`);
         
-        // After import completes, redirect to dashboard
         window.location.hash = 'dashboard';
     }
 };

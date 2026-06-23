@@ -582,3 +582,35 @@ export const Components = {
         `;
     }
 };
+
+// Login Screen Component
+export function renderLoginScreen() {
+    return `
+        <div id="login-screen">
+            <div class="login-card">
+                <h2>Welcome Back</h2>
+                <p>Sign in to access Kismet Investments Management</p>
+                <button id="google-signin-btn" class="google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                    Sign in with Google
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+export function renderUserProfile(user) {
+    if (!user) return '';
+    const photoURL = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User') + '&background=random';
+    return `
+        <div class="user-profile-section">
+            <img src="${photoURL}" alt="Profile">
+            <div class="user-info">
+                <div class="user-name">${user.displayName || 'Investor'}</div>
+            </div>
+            <button id="logout-btn" class="logout-btn" title="Sign Out">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    `;
+}
