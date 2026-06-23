@@ -1038,15 +1038,63 @@ let localState = {
 // If Firebase is initialized, we use this reactive state
 const cloudState = {
     properties: [],
+    units: [],
+    leases: [],
     tenants: [],
     transactions: []
 };
+
+// Data Migration Script for hierarchical properties
+if (!localState.units) localState.units = [];
+if (!localState.leases) localState.leases = [];
+
+// Migrate old scalar units to relational units
+localState.properties.forEach(prop => {
+    if (typeof prop.units === 'number' && prop.units > 0 && !localState.units.find(u => u.propertyId === prop.id)) {
+        for (let i = 1; i <= prop.units; i++) {
+            localState.units.push({
+                id: `u_${prop.id}_${i}`,
+                propertyId: prop.id,
+                name: prop.units === 1 ? 'Single Family' : `Unit ${i}`,
+                status: 'Vacant',
+                beds: 1,
+                baths: 1,
+                rent: 0
+            });
+        }
+    }
+});
+
+// Map tenants to their units if not already mapped
+localState.tenants.forEach(tenant => {
+    if (tenant.propertyId && (!tenant.leaseId || !tenant.unitId)) {
+        const propUnits = localState.units.filter(u => u.propertyId === tenant.propertyId);
+        let targetUnit = propUnits.find(u => u.name === tenant.unit || u.name === `Unit ${tenant.unit}`) || propUnits[0];
+        if (targetUnit) {
+            targetUnit.status = 'Occupied';
+            const leaseId = `l_${tenant.id}`;
+            localState.leases.push({
+                id: leaseId,
+                unitId: targetUnit.id,
+                propertyId: tenant.propertyId,
+                startDate: '2024-01-01',
+                endDate: '2025-01-01',
+                rentAmount: targetUnit.rent || 2000,
+                status: 'Active'
+            });
+            tenant.leaseId = leaseId;
+            tenant.unitId = targetUnit.id;
+        }
+    }
+});
 
 // Determine if we have a valid database connection
 const hasDb = db !== undefined;
 
 export const Store = {
     getProperties: () => hasDb && cloudState.properties.length > 0 ? cloudState.properties : localState.properties,
+    getUnits: () => hasDb && cloudState.units.length > 0 ? cloudState.units : localState.units,
+    getLeases: () => hasDb && cloudState.leases.length > 0 ? cloudState.leases : localState.leases,
     getTenants: () => hasDb ? cloudState.tenants : localState.tenants,
     getTransactions: () => hasDb && cloudState.transactions.length > 0 ? cloudState.transactions : localState.transactions,
     getMaintenance: () => localState.maintenance,
@@ -1058,8 +1106,9 @@ export const Store = {
         const txs = Store.getTransactions();
 
         const totalProperties = props.length;
-        const totalUnits = props.reduce((sum, p) => sum + (Number(p.units) || 0), 0);
-        const occupiedUnits = tenants.filter(t => t.status !== 'Past').length;
+        const allUnits = Store.getUnits();
+        const totalUnits = allUnits.length;
+        const occupiedUnits = allUnits.filter(u => u.status === 'Occupied').length;
         const occupancyRate = totalUnits ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
         
         const monthlyIncome = txs
@@ -1092,6 +1141,23 @@ export const Store = {
         } else {
             localState.properties.push(newProp);
             document.dispatchEvent(new CustomEvent('stateChanged'));
+        }
+    },
+    
+    updateProperty: async (id, updates) => {
+        if (hasDb && db) {
+            try {
+                const { doc, updateDoc } = window.firebaseFirestore;
+                await updateDoc(doc(db, 'properties', id), updates);
+            } catch (e) {
+                console.error("Error updating Firestore", e);
+            }
+        } else {
+            const index = localState.properties.findIndex(p => p.id === id);
+            if (index !== -1) {
+                localState.properties[index] = { ...localState.properties[index], ...updates };
+                document.dispatchEvent(new CustomEvent('stateChanged'));
+            }
         }
     },
     

@@ -76,21 +76,22 @@ const app = {
     },
 
     handleRoute: () => {
-        const hash = window.location.hash.substring(1) || 'dashboard';
-        app.currentView = hash;
+        const fullHash = window.location.hash.substring(1) || 'dashboard';
+        const [viewName, queryString] = fullHash.split('?');
+        app.currentView = viewName;
         
         // Update navigation active state
         document.querySelectorAll('.sidebar-nav .nav-item').forEach(el => {
             el.classList.remove('active');
-            if (el.dataset.view === hash) {
+            if (el.dataset.view === viewName) {
                 el.classList.add('active');
             }
         });
 
-        app.renderView(hash);
+        app.renderView(viewName, queryString);
     },
 
-    renderView: (viewName) => {
+    renderView: (viewName, queryString) => {
         const container = document.getElementById('view-container');
         
         switch(viewName) {
@@ -99,6 +100,9 @@ const app = {
                 break;
             case 'properties':
                 container.innerHTML = Components.renderProperties();
+                break;
+            case 'units':
+                container.innerHTML = Components.renderUnits(queryString);
                 break;
             case 'taxes':
                 container.innerHTML = Components.renderTaxes();
@@ -123,11 +127,11 @@ const app = {
         }
     },
 
-    showModal: (type) => {
+    showModal: (type, id = null) => {
         const modalHtml = `
             <div class="modal-overlay active" id="currentModalOverlay">
                 <div class="modal">
-                    ${Components.renderModalContent(type)}
+                    ${Components.renderModalContent(type, id)}
                 </div>
             </div>
         `;
@@ -151,6 +155,15 @@ const app = {
         const value = parseInt(document.getElementById('propValue').value, 10);
 
         Store.addProperty({ name, address, units, value, status: 'Active' });
+        app.closeModal();
+    },
+
+    submitEditProperty: (id) => {
+        const name = document.getElementById('editPropName').value;
+        const address = document.getElementById('editPropAddress').value;
+        const value = parseInt(document.getElementById('editPropValue').value, 10);
+        
+        Store.updateProperty(id, { name, address, value });
         app.closeModal();
     },
 

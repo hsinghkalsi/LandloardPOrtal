@@ -101,6 +101,8 @@ export const Components = {
 
     renderProperties: () => {
         const properties = Store.getProperties();
+        const allUnits = Store.getUnits();
+        
         return `
             <div class="view-header">
                 <div class="view-title">
@@ -124,20 +126,29 @@ export const Components = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${properties.map(p => `
+                            ${properties.map(p => {
+                                const propUnits = allUnits.filter(u => u.propertyId === p.id);
+                                return `
                                 <tr>
                                     <td>
                                         <div style="font-weight: 500">${p.name}</div>
                                         <div style="font-size: 0.75rem; color: var(--text-tertiary)">${p.address}</div>
                                     </td>
-                                    <td>${p.units}</td>
-                                    <td>$${p.value.toLocaleString()}</td>
+                                    <td>
+                                        ${propUnits.length}
+                                        <div style="font-size: 0.75rem; color: var(--text-tertiary)">
+                                            ${propUnits.filter(u => u.status === 'Vacant').length} Vacant
+                                        </div>
+                                    </td>
+                                    <td>$${(Number(p.value) || 0).toLocaleString()}</td>
                                     <td><span class="badge ${p.status === 'Active' ? 'success' : 'warning'}">${p.status}</span></td>
                                     <td>
-                                        <button class="icon-btn" title="Edit"><i class='bx bx-edit-alt'></i></button>
+                                        <button class="icon-btn" title="Edit" onclick="app.showModal('editProperty', '${p.id}')"><i class='bx bx-edit-alt'></i></button>
+                                        <button class="icon-btn" title="View Units" onclick="window.location.hash='units?prop=${p.id}'"><i class='bx bx-building-house'></i></button>
                                     </td>
                                 </tr>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -335,7 +346,7 @@ export const Components = {
         `;
     },
 
-    renderModalContent: (type) => {
+    renderModalContent: (type, id) => {
         if (type === 'addProperty') {
             return `
                 <div class="modal-header">
@@ -367,6 +378,35 @@ export const Components = {
                 <div class="modal-footer">
                     <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
                     <button class="btn btn-primary" onclick="document.getElementById('propertyForm').requestSubmit()">Save Property</button>
+                </div>
+            `;
+        } else if (type === 'editProperty') {
+            const prop = Store.getProperties().find(p => p.id === id);
+            if (!prop) return '<p>Property not found</p>';
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Edit Property</h2>
+                    <button class="modal-close" onclick="app.closeModal()"><i class='bx bx-x'></i></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPropertyForm" onsubmit="event.preventDefault(); app.submitEditProperty('${id}');">
+                        <div class="form-group">
+                            <label class="form-label">Property Name</label>
+                            <input type="text" class="form-control" id="editPropName" required value="${prop.name}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-control" id="editPropAddress" required value="${prop.address}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Est. Value ($)</label>
+                            <input type="number" class="form-control" id="editPropValue" required value="${prop.value}">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="app.submitEditProperty('${id}')">Save Changes</button>
                 </div>
             `;
         } else if (type === 'addTenant') {
@@ -577,6 +617,63 @@ export const Components = {
                         <li>TurboTenant Tenants Export</li>
                         <li>TurboTenant Accounting Ledger Export</li>
                     </ul>
+                </div>
+            </div>
+        `;
+    },
+
+    renderUnits: (queryString) => {
+        const params = new URLSearchParams(queryString);
+        const propId = params.get('prop');
+        const property = Store.getProperties().find(p => p.id === propId);
+        
+        if (!property) return '<p>Property not found.</p>';
+        
+        const units = Store.getUnits().filter(u => u.propertyId === propId);
+        const leases = Store.getLeases();
+        const tenants = Store.getTenants();
+
+        return `
+            <div class="view-header">
+                <div class="view-title">
+                    <button class="btn btn-secondary" onclick="window.location.hash='properties'" style="margin-bottom: 1rem;">
+                        <i class='bx bx-arrow-back'></i> Back to Properties
+                    </button>
+                    <h1>Units at ${property.name}</h1>
+                    <p>${property.address}</p>
+                </div>
+                <!-- Future: Add Unit button -->
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Unit Name</th>
+                                <th>Beds/Baths</th>
+                                <th>Rent</th>
+                                <th>Status</th>
+                                <th>Tenant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${units.map(u => {
+                                const activeLease = leases.find(l => l.unitId === u.id && l.status === 'Active');
+                                const unitTenants = activeLease ? tenants.filter(t => t.leaseId === activeLease.id) : [];
+                                const tenantNames = unitTenants.map(t => t.name).join(', ') || 'None';
+                                
+                                return `
+                                <tr>
+                                    <td><strong>${u.name}</strong></td>
+                                    <td>${u.beds} bed / ${u.baths} bath</td>
+                                    <td>$${(Number(u.rent) || 0).toLocaleString()}</td>
+                                    <td><span class="badge ${u.status === 'Occupied' ? 'success' : 'warning'}">${u.status}</span></td>
+                                    <td>${tenantNames}</td>
+                                </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         `;
