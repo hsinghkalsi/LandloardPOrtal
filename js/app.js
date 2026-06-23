@@ -53,10 +53,10 @@ const app = {
                 container.innerHTML = Components.renderTaxes();
                 break;
             case 'tenants':
-                container.innerHTML = `<div class="view-header"><h1>Tenants</h1></div><div class="card"><p>Tenant management coming soon...</p></div>`;
+                container.innerHTML = Components.renderTenants();
                 break;
             case 'financials':
-                container.innerHTML = `<div class="view-header"><h1>Financials</h1></div><div class="card"><p>Full ledger coming soon...</p></div>`;
+                container.innerHTML = Components.renderFinancials();
                 break;
             default:
                 container.innerHTML = Components.renderDashboard();

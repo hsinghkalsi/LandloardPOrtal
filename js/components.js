@@ -228,7 +228,110 @@ export const Components = {
         `;
     },
 
-    renderModalContent: (type) => {
+    renderTenants: () => {
+        const tenants = Store.getTenants();
+        const properties = Store.getProperties();
+        
+        // Map property names to tenants
+        const enrichedTenants = tenants.map(t => {
+            const prop = properties.find(p => p.id === t.propertyId);
+            return { ...t, propertyName: prop ? prop.name : 'Unknown' };
+        });
+
+        return `
+            <div class="view-header">
+                <div class="view-title">
+                    <h1>Tenants</h1>
+                    <p>Manage your renters and their contact information.</p>
+                </div>
+                <button class="btn btn-primary" onclick="app.showModal('addTenant')">
+                    <i class='bx bx-user-plus'></i> Add Tenant
+                </button>
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name / Contact</th>
+                                <th>Property & Unit</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${enrichedTenants.map(t => `
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 500">${t.name}</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-tertiary)">${t.email} • ${t.phone}</div>
+                                    </td>
+                                    <td>
+                                        <div>${t.propertyName}</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-tertiary)">Unit ${t.unit}</div>
+                                    </td>
+                                    <td><span class="badge ${t.status === 'Current' ? 'success' : t.status === 'Late' ? 'danger' : 'warning'}">${t.status}</span></td>
+                                    <td>
+                                        <button class="icon-btn" title="Contact"><i class='bx bx-envelope'></i></button>
+                                        <button class="icon-btn" title="Edit"><i class='bx bx-edit-alt'></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    },
+
+    renderFinancials: () => {
+        const transactions = Store.getTransactions();
+        
+        return `
+            <div class="view-header">
+                <div class="view-title">
+                    <h1>Financial Ledger</h1>
+                    <p>Track all income and expenses across your portfolio.</p>
+                </div>
+                <button class="btn btn-primary" onclick="app.showModal('addTransaction')">
+                    <i class='bx bx-plus'></i> Log Transaction
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${transactions.sort((a,b) => new Date(b.date) - new Date(a.date)).map(tx => `
+                                <tr>
+                                    <td>${tx.date}</td>
+                                    <td>${tx.description}</td>
+                                    <td><span class="badge ${tx.amount > 0 ? 'success' : 'warning'}">${tx.category}</span></td>
+                                    <td style="color: ${tx.amount > 0 ? 'var(--success)' : 'var(--text-primary)'}; font-weight: 600;">
+                                        ${tx.amount > 0 ? '+' : ''}$${tx.amount.toLocaleString()}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                            <i class='bx bx-paperclip'></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    },
         if (type === 'addProperty') {
             return `
                 <div class="modal-header">
