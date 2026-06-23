@@ -272,7 +272,9 @@ export const Components = {
                                     </td>
                                     <td><span class="badge ${t.status === 'Current' ? 'success' : t.status === 'Late' ? 'danger' : 'warning'}">${t.status}</span></td>
                                     <td>
-                                        <button class="icon-btn" title="Contact"><i class='bx bx-envelope'></i></button>
+                                        <a href="mailto:${t.email}?subject=Update regarding ${t.propertyName} - Unit ${t.unit}" class="icon-btn" title="Email via Gmail" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                            <i class='bx bx-envelope'></i>
+                                        </a>
                                         <button class="icon-btn" title="Edit"><i class='bx bx-edit-alt'></i></button>
                                     </td>
                                 </tr>
@@ -403,7 +405,12 @@ export const Components = {
                                     <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">${i.description}</div>
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <span style="font-size: 0.75rem; color: var(--text-tertiary)">${i.date}</span>
-                                        <button class="icon-btn" style="width: 28px; height: 28px; font-size: 1rem;"><i class='bx bx-right-arrow-alt'></i></button>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <a href="mailto:?subject=Maintenance Update: ${i.title} (${i.propertyName} - Unit ${i.unit})" class="icon-btn" title="Email Tenant" style="width: 28px; height: 28px; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                                <i class='bx bx-envelope'></i>
+                                            </a>
+                                            <button class="icon-btn" title="Move Status" style="width: 28px; height: 28px; font-size: 1rem;"><i class='bx bx-right-arrow-alt'></i></button>
+                                        </div>
                                     </div>
                                 </div>
                             `).join('') || '<div style="color: var(--text-tertiary); font-size: 0.875rem; text-align: center; padding: 1rem 0;">No issues</div>'}
