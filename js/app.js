@@ -1,6 +1,6 @@
 import { Store } from './state.js';
 import { Components, renderLoginScreen, renderUserProfile } from './components.js';
-import { auth, provider, signInWithPopup, onAuthStateChanged, signOut } from './firebase-config.js';
+import { auth, provider, signInWithPopup, onAuthStateChanged, signOut, db, doc, getDoc, setDoc, getDocs, collection } from './firebase-config.js';
 
 const app = {
     currentView: 'dashboard',
@@ -11,9 +11,49 @@ const app = {
         
         // Listen to Auth State
         if (auth) {
-            onAuthStateChanged(auth, (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     app.currentUser = user;
+                    
+                    // Check if user exists in Firestore
+                    let userDoc = null;
+                    if (db) {
+                        try {
+                            const userRef = doc(db, 'users', user.uid);
+                            const snapshot = await getDoc(userRef);
+                            if (!snapshot.exists()) {
+                                // Check if this is the very first user
+                                const allUsers = await getDocs(collection(db, 'users'));
+                                const role = allUsers.empty ? 'admin' : 'pending';
+                                
+                                userDoc = {
+                                    uid: user.uid,
+                                    email: user.email,
+                                    name: user.displayName,
+                                    role: role
+                                };
+                                await setDoc(userRef, userDoc);
+                            } else {
+                                userDoc = snapshot.data();
+                            }
+                            app.currentUserRole = userDoc.role;
+                        } catch (e) {
+                            console.error("Error fetching user role", e);
+                            app.currentUserRole = 'pending';
+                        }
+                    } else {
+                        app.currentUserRole = 'admin'; // fallback if no DB
+                    }
+                    
+                    if (app.currentUserRole === 'pending') {
+                        document.body.classList.add('logged-out');
+                        document.getElementById('view-container').innerHTML = Components.renderPendingApproval();
+                        
+                        const profileSection = document.querySelector('.user-profile-section');
+                        if (profileSection) profileSection.remove();
+                        return;
+                    }
+
                     document.body.classList.remove('logged-out');
                     // Setup User Profile in Sidebar
                     const sidebar = document.querySelector('.sidebar');
@@ -100,6 +140,13 @@ const app = {
                 break;
             case 'properties':
                 container.innerHTML = Components.renderProperties();
+                break;
+            case 'users':
+                if (app.currentUserRole === 'admin') {
+                    container.innerHTML = Components.renderUsers();
+                } else {
+                    container.innerHTML = '<p>Unauthorized</p>';
+                }
                 break;
             case 'units':
                 container.innerHTML = Components.renderUnits(queryString);
@@ -196,6 +243,12 @@ const app = {
         console.log(`Simulating import of ${file.name}`);
         
         window.location.hash = 'dashboard';
+    },
+
+    toggleUserStatus: async (uid, currentRole) => {
+        if (app.currentUserRole !== 'admin') return;
+        const newRole = currentRole === 'pending' ? 'approved' : 'pending';
+        await Store.updateUserStatus(uid, newRole);
     }
 };
 

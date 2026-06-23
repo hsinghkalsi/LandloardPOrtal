@@ -1,6 +1,65 @@
 import { Store } from './state.js';
 
 export const Components = {
+    renderPendingApproval: () => `
+        <div class="login-container" style="text-align: center; padding: 3rem;">
+            <div class="logo" style="justify-content: center; margin-bottom: 2rem;">
+                <i class='bx bx-time-five' style="font-size: 4rem; color: var(--text-secondary);"></i>
+            </div>
+            <h1 style="margin-bottom: 1rem;">Approval Pending</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                Your account has been created, but you must wait for an Administrator to approve your access.
+            </p>
+            <button class="btn btn-outline" id="logout-btn" style="width: 100%;">Sign Out</button>
+        </div>
+    `,
+
+    renderUsers: () => {
+        const users = Store.getUsers() || [];
+        return `
+            <div class="view-header">
+                <div class="view-title">
+                    <h1>User Management</h1>
+                    <p>Approve or revoke access for portal users.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(u => `
+                            <tr>
+                                <td><strong>${u.name}</strong></td>
+                                <td>${u.email}</td>
+                                <td>
+                                    <span class="status-badge status-${u.role === 'admin' ? 'paid' : (u.role === 'approved' ? 'paid' : 'late')}">
+                                        ${u.role.toUpperCase()}
+                                    </span>
+                                </td>
+                                <td>
+                                    ${u.role !== 'admin' ? `
+                                        <button class="btn btn-outline btn-sm" onclick="app.toggleUserStatus('${u.uid}', '${u.role}')">
+                                            ${u.role === 'pending' ? 'Approve' : 'Revoke'}
+                                        </button>
+                                    ` : '<span style="color:var(--text-secondary); font-size:0.8rem;">Admin</span>'}
+                                </td>
+                            </tr>
+                        `).join('')}
+                        ${users.length === 0 ? '<tr><td colspan="4" style="text-align:center;">No users found.</td></tr>' : ''}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    },
+
     renderDashboard: () => {
         const stats = Store.getDashboardStats();
         const recentTx = Store.getTransactions().slice(0, 5);

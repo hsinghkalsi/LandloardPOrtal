@@ -1041,7 +1041,8 @@ const cloudState = {
     units: [],
     leases: [],
     tenants: [],
-    transactions: []
+    transactions: [],
+    users: []
 };
 
 // Data Migration Script for hierarchical properties
@@ -1195,6 +1196,23 @@ export const Store = {
         }
     },
 
+    // Users
+    getUsers: () => {
+        return hasDb ? cloudState.users : [];
+    },
+
+    updateUserStatus: async (uid, newRole) => {
+        if (!hasDb) return;
+        try {
+            const { doc, updateDoc } = window.firebaseFirestore;
+            await updateDoc(doc(db, 'users', uid), {
+                role: newRole
+            });
+        } catch (e) {
+            console.error("Error updating user status:", e);
+        }
+    },
+
     initRealtimeListeners: () => {
         if (!hasDb) return;
 
@@ -1208,6 +1226,12 @@ export const Store = {
         // Listen to transactions collection
         onSnapshot(collection(db, "transactions"), (snapshot) => {
             cloudState.transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            document.dispatchEvent(new Event('stateChanged'));
+        });
+
+        // Listen to users collection
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            cloudState.users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             document.dispatchEvent(new Event('stateChanged'));
         });
     }

@@ -1,15 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, onSnapshot, doc, setDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-// TODO: Replace this with your actual Firebase configuration from the Firebase Console
+// Actual Firebase configuration from the Firebase Console
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDeVxDoA33yb1LTAkGqLP0VAEyoj-50CD8",
+  authDomain: "kismet-investments.firebaseapp.com",
+  projectId: "kismet-investments",
+  storageBucket: "kismet-investments.firebasestorage.app",
+  messagingSenderId: "513182179000",
+  appId: "1:513182179000:web:9e69463119d484916c1e4d",
+  measurementId: "G-SEPPW2L5KQ"
 };
 
 let db;
@@ -26,8 +27,11 @@ try {
     // Initialize Firebase Authentication
     auth = getAuth(app);
     provider = new GoogleAuthProvider();
+    
+    // Fallback for state.js legacy accesses
+    window.firebaseFirestore = { doc, setDoc, updateDoc, getDoc };
 } catch (e) {
     console.warn("Firebase not configured yet. Using local mock data. Error: ", e);
 }
 
-export { db, auth, provider, collection, getDocs, addDoc, onSnapshot, signInWithPopup, onAuthStateChanged, signOut };
+export { db, auth, provider, collection, getDocs, addDoc, onSnapshot, doc, setDoc, updateDoc, getDoc, signInWithPopup, onAuthStateChanged, signOut };
