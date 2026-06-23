@@ -1,4 +1,5 @@
-// Main Application Logic
+import { Store } from './state.js';
+import { Components } from './components.js';
 
 const app = {
     currentView: 'dashboard',
@@ -6,6 +7,9 @@ const app = {
     init: () => {
         app.bindEvents();
         app.handleRoute();
+        
+        // Start Firebase real-time listeners (if configured)
+        Store.initRealtimeListeners();
         
         // Listen for hash changes to navigate
         window.addEventListener('hashchange', app.handleRoute);
@@ -93,3 +97,6 @@ const app = {
 
 // Start the app when DOM is ready
 document.addEventListener('DOMContentLoaded', app.init);
+
+// Expose to window for inline onclick handlers
+window.app = app;

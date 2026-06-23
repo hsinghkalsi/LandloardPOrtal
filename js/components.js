@@ -1,6 +1,6 @@
-// UI Components and View Generators
+import { Store } from './state.js';
 
-const Components = {
+export const Components = {
     renderDashboard: () => {
         const stats = Store.getDashboardStats();
         const recentTx = Store.getTransactions().slice(0, 5);
