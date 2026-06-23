@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landlord Portal</title>
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Boxicons for standard icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class='bx bx-building-house'></i>
+                    <span>LuxorManage</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-view="dashboard">
+                    <i class='bx bx-grid-alt'></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#properties" class="nav-item" data-view="properties">
+                    <i class='bx bx-buildings'></i>
+                    <span>Properties</span>
+                </a>
+                <a href="#tenants" class="nav-item" data-view="tenants">
+                    <i class='bx bx-user-circle'></i>
+                    <span>Tenants</span>
+                </a>
+                <a href="#financials" class="nav-item" data-view="financials">
+                    <i class='bx bx-wallet'></i>
+                    <span>Financials</span>
+                </a>
+                <a href="#taxes" class="nav-item" data-view="taxes">
+                    <i class='bx bx-file'></i>
+                    <span>Tax Reports</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#settings" class="nav-item">
+                    <i class='bx bx-cog'></i>
+                    <span>Settings</span>
+                </a>
+                <div class="user-profile">
+                    <div class="avatar">H</div>
+                    <div class="user-info">
+                        <span class="name">Harkamal</span>
+                        <span class="role">Admin</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="search-bar">
+                    <i class='bx bx-search'></i>
+                    <input type="text" placeholder="Search properties, tenants, or transactions...">
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn"><i class='bx bx-bell'></i></button>
+                    <button class="btn btn-primary" id="globalAddBtn">+ Add New</button>
+                </div>
+            </header>
+            
+            <div id="view-container" class="view-container">
+                <!-- Views will be dynamically injected here by app.js -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals Container -->
+    <div id="modal-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/state.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
