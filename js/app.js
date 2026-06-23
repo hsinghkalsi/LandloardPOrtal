@@ -58,6 +58,15 @@ const app = {
             case 'financials':
                 container.innerHTML = Components.renderFinancials();
                 break;
+            case 'maintenance':
+                container.innerHTML = Components.renderMaintenance();
+                break;
+            case 'documents':
+                container.innerHTML = Components.renderDocuments();
+                break;
+            case 'import':
+                container.innerHTML = Components.renderImport();
+                break;
             default:
                 container.innerHTML = Components.renderDashboard();
         }

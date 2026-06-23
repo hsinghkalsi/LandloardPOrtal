@@ -11,6 +11,14 @@ const localState = {
         { id: 'tx1', date: '2026-06-01', description: 'Rent - Alice J.', category: 'Income: Rent', amount: 1500, propertyId: 'p1' },
         { id: 'tx3', date: '2026-06-05', description: 'Plumbing Repair', category: 'Expense: Repairs', amount: -250, propertyId: 'p2' },
         { id: 'tx4', date: '2026-06-15', description: 'Property Tax Q2', category: 'Expense: Taxes', amount: -1200, propertyId: 'p1' }
+    ],
+    maintenance: [
+        { id: 'm1', title: 'Leaking Faucet', description: 'Kitchen sink is dripping constantly', propertyId: 'p1', unit: 'A', status: 'To Do', date: '2026-06-20' },
+        { id: 'm2', title: 'Broken AC', description: 'AC unit blowing warm air', propertyId: 'p2', unit: '1', status: 'In Progress', date: '2026-06-22' }
+    ],
+    documents: [
+        { id: 'd1', name: 'Lease Agreement - Alice J.', type: 'PDF', size: '2.4 MB', date: '2026-01-01' },
+        { id: 'd2', name: 'Plumbing Invoice', type: 'PDF', size: '1.1 MB', date: '2026-06-05' }
     ]
 };
 
@@ -28,6 +36,8 @@ export const Store = {
     getProperties: () => hasDb && cloudState.properties.length > 0 ? cloudState.properties : localState.properties,
     getTenants: () => hasDb ? cloudState.tenants : localState.tenants,
     getTransactions: () => hasDb && cloudState.transactions.length > 0 ? cloudState.transactions : localState.transactions,
+    getMaintenance: () => localState.maintenance,
+    getDocuments: () => localState.documents,
     
     getDashboardStats: () => {
         const props = Store.getProperties();

@@ -367,5 +367,131 @@ export const Components = {
             `;
         }
         return '';
+    },
+
+    renderMaintenance: () => {
+        const issues = Store.getMaintenance();
+        const properties = Store.getProperties();
+
+        const enrichedIssues = issues.map(i => {
+            const prop = properties.find(p => p.id === i.propertyId);
+            return { ...i, propertyName: prop ? prop.name : 'Unknown' };
+        });
+
+        return `
+            <div class="view-header">
+                <div class="view-title">
+                    <h1>Maintenance Requests</h1>
+                    <p>Track repairs and tenant service requests.</p>
+                </div>
+                <button class="btn btn-primary">
+                    <i class='bx bx-plus'></i> New Request
+                </button>
+            </div>
+            
+            <div class="dashboard-grid">
+                ${['To Do', 'In Progress', 'Done'].map(status => `
+                    <div class="card" style="background: var(--bg-elevated)">
+                        <div class="card-header">
+                            <div class="card-title">${status}</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            ${enrichedIssues.filter(i => i.status === status).map(i => `
+                                <div style="background: var(--bg-surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color)">
+                                    <div style="font-weight: 600; margin-bottom: 0.25rem;">${i.title}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-bottom: 0.5rem;">${i.propertyName} - Unit ${i.unit}</div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">${i.description}</div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-size: 0.75rem; color: var(--text-tertiary)">${i.date}</span>
+                                        <button class="icon-btn" style="width: 28px; height: 28px; font-size: 1rem;"><i class='bx bx-right-arrow-alt'></i></button>
+                                    </div>
+                                </div>
+                            `).join('') || '<div style="color: var(--text-tertiary); font-size: 0.875rem; text-align: center; padding: 1rem 0;">No issues</div>'}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    },
+
+    renderDocuments: () => {
+        const docs = Store.getDocuments();
+        
+        return `
+            <div class="view-header">
+                <div class="view-title">
+                    <h1>Document Storage</h1>
+                    <p>Leases, receipts, and important property files.</p>
+                </div>
+                <button class="btn btn-primary">
+                    <i class='bx bx-upload'></i> Upload File
+                </button>
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Date Added</th>
+                                <th>Size</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${docs.map(d => `
+                                <tr>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <i class='bx bxs-file-pdf' style="color: var(--danger); font-size: 1.5rem;"></i>
+                                            <span style="font-weight: 500">${d.name}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge" style="background: var(--bg-elevated); color: var(--text-primary)">${d.type}</span></td>
+                                    <td>${d.date}</td>
+                                    <td>${d.size}</td>
+                                    <td>
+                                        <button class="icon-btn" title="Download"><i class='bx bx-download'></i></button>
+                                        <button class="icon-btn" title="Delete"><i class='bx bx-trash'></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    },
+
+    renderImport: () => {
+        return `
+            <div class="view-header">
+                <div class="view-title">
+                    <h1>Data Importer (TurboTenant)</h1>
+                    <p>Migrate your data from TurboTenant to your new system.</p>
+                </div>
+            </div>
+            <div class="card" style="max-width: 600px;">
+                <div style="text-align: center; padding: 3rem 1rem;">
+                    <i class='bx bx-cloud-upload' style="font-size: 4rem; color: var(--accent-primary); margin-bottom: 1rem;"></i>
+                    <h3>Upload TurboTenant CSV</h3>
+                    <p style="margin-bottom: 2rem;">Drag and drop your exported Properties, Tenants, or Transactions CSV file here.</p>
+                    
+                    <input type="file" id="csvUpload" accept=".csv" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('csvUpload').click()">
+                        Select CSV File
+                    </button>
+                </div>
+                <div style="padding: 1.5rem; background: var(--bg-elevated); border-top: 1px solid var(--border-light);">
+                    <h4>Supported Formats</h4>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                        <li>TurboTenant Properties Export</li>
+                        <li>TurboTenant Tenants Export</li>
+                        <li>TurboTenant Accounting Ledger Export</li>
+                    </ul>
+                </div>
+            </div>
+        `;
     }
 };
