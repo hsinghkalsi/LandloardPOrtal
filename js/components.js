@@ -334,6 +334,8 @@ export const Components = {
             </div>
         `;
     },
+
+    renderModalContent: (type) => {
         if (type === 'addProperty') {
             return `
                 <div class="modal-header">
