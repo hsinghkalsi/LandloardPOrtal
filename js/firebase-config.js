@@ -11,7 +11,7 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
-let db, collection, getDocs, addDoc, onSnapshot;
+let db;
 
 try {
     // Initialize Firebase
@@ -19,10 +19,8 @@ try {
 
     // Initialize Cloud Firestore and get a reference to the service
     db = getFirestore(app);
-    // Export the needed functions from firestore
-    collection = window.collection || null; // Will fix exports below
 } catch (e) {
     console.warn("Firebase not configured yet. Using local mock data. Error: ", e);
 }
 
-export { db };
+export { db, collection, getDocs, addDoc, onSnapshot };
