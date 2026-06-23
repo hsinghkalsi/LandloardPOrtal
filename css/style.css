@@ -606,10 +606,26 @@ tr:hover td {
     height: 24px;
 }
 
-/* Auth state classes */
-body.logged-out #sidebar,
-body.logged-out #main-content {
+/* Auth States */
+body.logged-out .sidebar,
+body.logged-out .top-header {
     display: none !important;
+}
+
+body.logged-out .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-main);
+}
+
+body.logged-out .view-container {
+    padding: 0;
+    width: 100%;
+    max-width: 400px;
 }
 
 .user-profile-section {
